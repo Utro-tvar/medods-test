@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 
+	"github.com/Utro-tvar/medods-test/internal/email"
 	"github.com/Utro-tvar/medods-test/internal/pkg/models"
 	"github.com/Utro-tvar/medods-test/internal/tokens"
 	"golang.org/x/crypto/bcrypt"
@@ -39,7 +41,7 @@ func (t *TokenService) Generate(user models.User) models.TokensPair {
 	return models.TokensPair{Access: access, Refresh: refresh}
 }
 
-func (t *TokenService) Refresh(tokensPair models.TokensPair) models.TokensPair {
+func (t *TokenService) Refresh(tokensPair models.TokensPair, ip net.IP) models.TokensPair {
 	const op = "service.Refresh"
 
 	user, err := tokens.ExtractUser(tokensPair.Access, t.cfg.key)
@@ -66,6 +68,10 @@ func (t *TokenService) Refresh(tokensPair models.TokensPair) models.TokensPair {
 		t.logger.Info(fmt.Sprintf("%s: Refresh token does not exist, user: %s", op, user.GUID))
 		return models.TokensPair{}
 	}
+	if !net.IP.Equal(ip, user.IP) {
+		email.Send("mock@email.com", []byte("Your IP has been changed"))
+	}
+	user.IP = ip
 	return t.Generate(user)
 }
 

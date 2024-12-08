@@ -5,7 +5,6 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/Utro-tvar/medods-test/internal/email"
 	mwlog "github.com/Utro-tvar/medods-test/internal/middleware/logger"
 	"github.com/Utro-tvar/medods-test/internal/pkg/models"
 	"github.com/go-chi/chi/v5"
@@ -60,10 +59,6 @@ func New(logger *slog.Logger, service Service) *App {
 			return
 		}
 		ip := net.ParseIP(ipstr)
-		user := service.GetUser(tokens.Access)
-		if !net.IP.Equal(ip, user.IP) {
-			email.Send("mock@email.com", []byte("Your IP has been changed"))
-		}
 
 		new := service.Refresh(tokens, ip)
 		render.JSON(w, r, new)
