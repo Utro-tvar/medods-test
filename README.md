@@ -7,7 +7,7 @@
 Для сборки и запуска:
 
 1. Изменить .env и ./postgres/.env:
-   .env:
+   .env:\
    
    ```dotenv
    #tokens parameters
@@ -21,7 +21,7 @@
    DB_NAME=service
    ```
    
-   ./postgres/.env:
+   ./postgres/.env:\
    
    ```dotenv
    POSTGRES_USER=postgres
@@ -40,6 +40,6 @@
    ```
 
 Сервис поддерживает 2 маршрута:
-/generate/{guid} - get запрос возвращает json с парой токенов  
+/generate/{guid} - get запрос возвращает json с парой токенов\
 /refresh - post запрос, принимает json с парой токенов и возвращает такой же json с новыми токенами
 
