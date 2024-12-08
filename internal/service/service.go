@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"time"
 
 	"github.com/Utro-tvar/medods-test/internal/pkg/models"
 	"github.com/Utro-tvar/medods-test/internal/tokens"
@@ -17,20 +16,18 @@ type Storage interface {
 }
 
 type TokenService struct {
-	logger     *slog.Logger
-	storage    Storage
-	accessTTL  time.Duration
-	refreshTTL time.Duration
-	key        []byte
+	logger  *slog.Logger
+	storage Storage
+	cfg     Config
 }
 
 func New(logger *slog.Logger, storage Storage) *TokenService {
-	return &TokenService{logger: logger, storage: storage}
+	return &TokenService{logger: logger, storage: storage, cfg: ParseENV(logger)}
 }
 
 func (t *TokenService) Generate(user models.User) models.TokensPair {
 	const op = "service.Generate"
-	access, refresh, err := tokens.Generate(user, t.accessTTL, t.refreshTTL, t.key)
+	access, refresh, err := tokens.Generate(user, t.cfg.accessTTL, t.cfg.refreshTTL, t.cfg.key)
 
 	if err != nil {
 		t.logger.Error(fmt.Sprintf("%s: Cannot generate tokens for user %s", op, user.GUID), slog.Any("error", err))
@@ -45,13 +42,13 @@ func (t *TokenService) Generate(user models.User) models.TokensPair {
 func (t *TokenService) Refresh(tokensPair models.TokensPair) models.TokensPair {
 	const op = "service.Refresh"
 
-	user, err := tokens.ExtractUser(tokensPair.Access, t.key)
+	user, err := tokens.ExtractUser(tokensPair.Access, t.cfg.key)
 	if err != nil {
 		t.logger.Error(fmt.Sprintf("%s: Cannot extract user from token", op), slog.Any("error", err))
 		return models.TokensPair{}
 	}
 
-	valid, err := tokens.Validate(tokensPair.Access, tokensPair.Refresh, t.key)
+	valid, err := tokens.Validate(tokensPair.Access, tokensPair.Refresh, t.cfg.key)
 	if !valid {
 		if errors.Is(err, tokens.ErrTokensPairIsInvalid) {
 			t.logger.Info(fmt.Sprintf("%s: Tokens for user %s in invalid", op, user.GUID))
@@ -73,7 +70,7 @@ func (t *TokenService) Refresh(tokensPair models.TokensPair) models.TokensPair {
 }
 
 func (t *TokenService) GetUser(access string) models.User {
-	user, err := tokens.ExtractUser(access, t.key)
+	user, err := tokens.ExtractUser(access, t.cfg.key)
 	if err != nil {
 		t.logger.Error("cannot parse token", slog.Any("error", err))
 	}
