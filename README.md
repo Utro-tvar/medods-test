@@ -6,8 +6,7 @@
 
 Для сборки и запуска:
 
-1. Изменить .env и ./postgres/.env:
-   .env:\
+1. Изменить .env и ./postgres/.env:<br />   .env:
    
    ```dotenv
    #tokens parameters
@@ -21,7 +20,7 @@
    DB_NAME=service
    ```
    
-   ./postgres/.env:\
+   ./postgres/.env:
    
    ```dotenv
    POSTGRES_USER=postgres
@@ -39,7 +38,5 @@
    docker compose -f "docker-compose.yml" up -d --build
    ```
 
-Сервис поддерживает 2 маршрута:
-/generate/{guid} - get запрос возвращает json с парой токенов\
-/refresh - post запрос, принимает json с парой токенов и возвращает такой же json с новыми токенами
+Сервис поддерживает 2 маршрута:<br />/generate/{guid} - get запрос возвращает json с парой токенов<br />/refresh - post запрос, принимает json с парой токенов и возвращает такой же json с новыми токенами
 
