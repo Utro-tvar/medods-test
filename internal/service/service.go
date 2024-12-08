@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -32,7 +33,7 @@ func (t *TokenService) Generate(user models.User) models.TokensPair {
 	access, refresh, err := tokens.Generate(user, t.accessTTL, t.refreshTTL, t.key)
 
 	if err != nil {
-		t.logger.Error("%s: Cannot generate tokens for user %s", op, user.GUID, slog.Any("error", err))
+		t.logger.Error(fmt.Sprintf("%s: Cannot generate tokens for user %s", op, user.GUID), slog.Any("error", err))
 		return models.TokensPair{}
 	}
 
@@ -46,26 +47,26 @@ func (t *TokenService) Refresh(tokensPair models.TokensPair) models.TokensPair {
 
 	user, err := tokens.ExtractUser(tokensPair.Access, t.key)
 	if err != nil {
-		t.logger.Error("%s: Cannot extract user from token", op, slog.Any("error", err))
+		t.logger.Error(fmt.Sprintf("%s: Cannot extract user from token", op), slog.Any("error", err))
 		return models.TokensPair{}
 	}
 
 	valid, err := tokens.Validate(tokensPair.Access, tokensPair.Refresh, t.key)
 	if !valid {
 		if errors.Is(err, tokens.ErrTokensPairIsInvalid) {
-			t.logger.Info("%s: Tokens for user %s in invalid", op, user.GUID)
+			t.logger.Info(fmt.Sprintf("%s: Tokens for user %s in invalid", op, user.GUID))
 		} else {
-			t.logger.Error("%s: Cannot validate tokens", op, slog.Any("error", err))
+			t.logger.Error(fmt.Sprintf("%s: Cannot validate tokens", op), slog.Any("error", err))
 		}
 		return models.TokensPair{}
 	}
 
 	hasToken, err := t.storage.CheckAndRemove(TokenHash(tokensPair.Refresh))
 	if err != nil {
-		t.logger.Error("%s: Error while talk to database", op, slog.Any("error", err))
+		t.logger.Error(fmt.Sprintf("%s: Error while talk to database", op), slog.Any("error", err))
 	}
 	if !hasToken {
-		t.logger.Info("%s: Refresh token does not exist, user: %s", op, user.GUID)
+		t.logger.Info(fmt.Sprintf("%s: Refresh token does not exist, user: %s", op, user.GUID))
 		return models.TokensPair{}
 	}
 	return t.Generate(user)
