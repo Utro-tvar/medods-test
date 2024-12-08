@@ -72,6 +72,14 @@ func (t *TokenService) Refresh(tokensPair models.TokensPair) models.TokensPair {
 	return t.Generate(user)
 }
 
+func (t *TokenService) GetUser(access string) models.User {
+	user, err := tokens.ExtractUser(access, t.key)
+	if err != nil {
+		t.logger.Error("cannot parse token", slog.Any("error", err))
+	}
+	return user
+}
+
 func TokenHash(token string) string {
 	bytes := []byte(token)
 	bytes, _ = bcrypt.GenerateFromPassword(bytes[len(bytes)-70:], 12) // use 70 last bytes to generate hash
