@@ -45,38 +45,38 @@ func New() (*Storage, error) {
 	return &Storage{db: db}, nil
 }
 
-func (s *Storage) Store(token string) error {
+func (s *Storage) Store(guid, token string) error {
 	const op = "storage.postgres.Store"
-	stmt, err := s.db.Prepare("INSERT INTO refreshes VALUES ('$1')")
+	stmt, err := s.db.Prepare("INSERT INTO refreshes VALUES ($1, $2);")
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
-	_, err = stmt.Exec(token)
+	_, err = stmt.Exec(fmt.Sprintf("'%s'", guid), fmt.Sprintf("'%s'", token))
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 	return nil
 }
 
-func (s *Storage) CheckAndRemove(token string) (exists bool, err error) {
+func (s *Storage) GetHash(guid string) (hash string, err error) {
 	const op = "storage.postgres.CheckAndRemove"
-	stmt, err := s.db.Prepare("DELETE FROM refreshes WHERE hash = '$1' RETURNING hash")
+	stmt, err := s.db.Prepare("DELETE FROM refreshes WHERE guid = $1 RETURNING hash;")
 	if err != nil {
-		return false, fmt.Errorf("%s: %w", op, err)
+		return "", fmt.Errorf("%s: %w", op, err)
 	}
 	row := ""
-	res := stmt.QueryRow(token)
+	res := stmt.QueryRow(fmt.Sprintf("'%s'", guid))
 
 	err = res.Scan(&row)
 	if err != nil {
-		return false, fmt.Errorf("%s: %w", op, err)
+		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
 	if row == "" {
-		return false, nil
+		return "", nil
 	}
-	return true, nil
+	return row, nil
 }
 
 func (s *Storage) Close() {
