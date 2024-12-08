@@ -32,7 +32,7 @@ func main() {
 
 	rest := rest.New(log, service)
 
-	go rest.MustRun("localhost:8080")
+	go rest.MustRun(":8080")
 
 	log.Info("service start listening at localhost:8080")
 
