@@ -34,18 +34,21 @@ func New(logger *slog.Logger, service Service) *App {
 	app.router.Use(middleware.Recoverer)
 	app.router.Use(middleware.URLFormat)
 
-	app.router.Route("/generate/{guid}", func(r chi.Router) {
-		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			guid := chi.URLParam(r, "guid")
-			ipstr, _, err := net.SplitHostPort(r.RemoteAddr)
-			if err != nil {
-				logger.Error("Cannot get user ip", slog.Any("error", err))
-				render.Data(w, r, []byte("Cannot parse your ip"))
-				return
-			}
-			ip := net.ParseIP(ipstr)
-			render.JSON(w, r, service.Generate(models.User{GUID: guid, IP: ip}))
-		})
+	app.router.Get("/generate", func(w http.ResponseWriter, r *http.Request) {
+		guid := r.URL.Query().Get("GUID")
+		if guid == "" {
+			logger.Error("Empty user guid")
+			render.JSON(w, r, nil)
+			return
+		}
+		ipstr, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			logger.Error("Cannot get user ip", slog.Any("error", err))
+			render.JSON(w, r, nil)
+			return
+		}
+		ip := net.ParseIP(ipstr)
+		render.JSON(w, r, service.Generate(models.User{GUID: guid, IP: ip}))
 	})
 
 	app.router.Post("/refresh", func(w http.ResponseWriter, r *http.Request) {

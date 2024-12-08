@@ -38,5 +38,5 @@
    docker compose -f "docker-compose.yml" up -d --build
    ```
 
-Сервис поддерживает 2 маршрута:<br />/generate/{guid} - get запрос возвращает json с парой токенов<br />/refresh - post запрос, принимает json с парой токенов и возвращает такой же json с новыми токенами
+Сервис поддерживает 2 маршрута:<br />/generate?GUID={guid} - get запрос возвращает json с парой токенов<br />/refresh - post запрос, принимает json с парой токенов и возвращает такой же json с новыми токенами
 
