@@ -33,12 +33,12 @@
    DB_PASS=password
    DB_NAME=service
    ```
-2. 
-3. Выполнить
+2. Выполнить
    
    ```bash
    docker compose -f "docker-compose.yml" up -d --build
    ```
+
 
 Сервис поддерживает 2 маршрута:
 /generate/{guid} - get запрос возвращает json с парой токенов
