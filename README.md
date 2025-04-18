@@ -2,7 +2,7 @@
 
 **Задание:**
 
-[Написать часть сервиса аутентифика](https://medods.notion.site/Test-task-BackDev-623508ed85474f48a721e43ab00e9916)
+[Написать часть сервиса аутентифика](https://medods.yonote.ru/share/a74f6d8d-1489-4b54-bd82-81af5bf50a03/doc/test-task-backdev-sCBrYs5n6e)
 
 Для сборки и запуска:
 
